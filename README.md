@@ -1,6 +1,6 @@
 # TEL100 IOT Smartvanning Gruppe 5 Gruppeprosjekt
 
-Dette er alle digitale ressursjer for Gruppe 5 (Johannes Standal, Oskar Nærheim, Andreas Brustad og Lasse Lindholm) sitt gruppeprosjekt i TEL100 faget på NMBU.
+Dette er alle digitale ressursjer for Gruppe 5 (Johannes Standal, Oskar Nerheim, Andreas Brustad og Lasse Lindholm) sitt gruppeprosjekt i TEL100 faget på NMBU.
 
 ## Inneholder
 
@@ -16,7 +16,7 @@ Kode og ressurser for å kontrollere følgende:
 Følgende personer kan kontaktes for spørsmål om prosjektet:
 - andreas.carelius.brustad@nmbu.no
 - <a href="mailto:abc@def.com">johannes.husevåg.standal@nmbu.no</a>
-- <a href="mailto:abc@def.com">oskar.nærheim@nmbu.no</a>
+- oskar.nerheim@nmbu.no
 - lasse.lindholm@nmbu.no
 
 ## Takk til
