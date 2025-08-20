@@ -22,4 +22,4 @@ Følgende personer kan kontaktes for spørsmål om prosjektet:
 ## Takk til
 
 - MET Norge for værdata
-- Michael Margolis for Arduino Time Library
+- Eik lab for lån av komponenter
