@@ -76,6 +76,29 @@ fs.writeFile('data.json', jsonData, (err) => {
   }
 });
 
+// Read the data.json file
+fs.readFile('data.json', 'utf8', (err, data) => {
+  if (err) {
+    console.error('Error reading the file:', err);
+    return;
+  }
+
+  try {
+    // Parse the JSON data
+    const jsonData = JSON.parse(data);
+
+    // Extract the measured moist level and water level
+    const measuredMoistLevel = jsonData.mesuredMoistLevel;
+    const measuredWaterLevel = jsonData.mesuredWaterLevel;
+
+    console.log('Measured Moist Level:', measuredMoistLevel);
+    console.log('Measured Water Level:', measuredWaterLevel);
+  } catch (parseError) {
+    console.error('Error parsing JSON:', parseError);
+  }
+});
+
+
 
 /**
 Input:
