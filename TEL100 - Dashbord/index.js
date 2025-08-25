@@ -10,6 +10,8 @@ const lonInput = document.getElementById("lon")
 const latInput = document.getElementById("lat")
 const moistInput = document.getElementById("moist")
 
+const fs = request('fs');
+
 //Desse fire variablane må lesast av arduino
 var targetMoistLevel; //integer
 var indoorPlant; //booleansk verdi
@@ -20,6 +22,22 @@ var latitude;
 var measuredMoistLevel; //integer (0, 100) %
 var measuredWaterLevel = 10; //integer (0, 10)
 
+const data = {
+    targetMoistLevel: targetMoistLevel,
+    indoorPlant: indoorPlant,
+    langditude: langditude,
+    latitude: latitude
+}
+
+const jsonData = JSON.stringify(data, null, 2);
+
+fs.writeFile('data.json', jsonData, (err) => {
+  if (err) {
+    console.error('Error writing to file:', err);
+  } else {
+    console.log('Data successfully written to output.json');
+  }
+});
 
 
 function RenderWaterTank(){
