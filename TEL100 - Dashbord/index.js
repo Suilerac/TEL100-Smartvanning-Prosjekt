@@ -34,17 +34,17 @@ var indoorPlant;      // - booleansk verdi
 var longditude;       // - fire desimalar
 var latitude;         // - fire desimalar
 
-//Desse 2 variablane må sendast
-var measuredMoistLevel;     // - integer (0, 100) %
-var measuredWaterLevel = 5; // - integer (0, 10)
+//Desse 3 variablane må sendast
+var measuredMoistLevel = 100;   // - integer (0, 100) %
+var measuredWaterLevel = 100;   // - integer (0, 100)
+var willRain = false            // - booleans verdi
 
-function RenderWaterTank(){
-    let percent = (measuredWaterLevel / 10) * 100; 
-    waterLevelElement.innerHTML = "Vannbestand - " + String(percent) + "%"
+function RenderWaterTank(){ 
+    waterLevelElement.innerHTML = `Vannbestand ${measuredWaterLevel}%`
     for (let i = 1; i <= 10; i++){
         const waterBarElement = document.getElementById(String(i))
 
-        if (i <= measuredWaterLevel){
+        if ((i-1)*10 <= measuredWaterLevel){
             waterBarElement.style.visibility = "visible"
         }
         else {
@@ -89,10 +89,19 @@ setInterval(updateStatus, 2000); // poll every 2s
 
 //Les inputs og oppdater samsvarande variablar
 setInterval(()=>{
+    //oppdater variablar
     indoorPlant = indoorPlantCheckbox.checked
     longditude = GetValue(lonInput)
     latitude = GetValue(latInput)
     targetMoistLevel = GetValue(moistInput)
+
+    //kalkulering 
+
+    //status
+    statusElement1.innerHTML = `${measuredWaterLevel}%`
+    statusElement2.innerHTML = (willRain) ? "Ja" : "Nei" 
+    statusElement3.innerHTML = (measuredWaterLevel < 20) ? "Ja" : "Nei"
+
 }, 100)
 
 setInterval(()=>{
