@@ -1,3 +1,21 @@
+/**
+Nettsidekode for dashbordet til smartpotta
+Formål; kommunisere desse variablane mellom 
+Arduino mkr 1010 (client), og nettsida (server).
+
+Input:
+- posisjon (lengdegrad, breiddegrad) 4 desimalar 
+- innendørsplante: bool
+- ønska fuktighet: %
+
+Status:
+- Vannbestand i tank
+- current fuktighetsnivå
+- skal regne neste 12 timar
+
+text nederst
+-"Basert på data frå MET-Norge"
+**/
 const waterLevelElement = document.getElementById("vannBestand")
 
 const statusElement1 = document.getElementById("status1")
@@ -10,19 +28,15 @@ const lonInput = document.getElementById("lon")
 const latInput = document.getElementById("lat")
 const moistInput = document.getElementById("moist")
 
-const fs = request('fs');
-
 //Desse fire variablane må lesast av arduino
-var targetMoistLevel; //integer
-var indoorPlant; //booleansk verdi
-var longditude;
-var latitude;
+var targetMoistLevel; // - integer
+var indoorPlant;      // - booleansk verdi
+var longditude;       // - fire desimalar
+var latitude;         // - fire desimalar
 
 //Desse 2 variablane må sendast
-var measuredMoistLevel; //integer (0, 100) %
-var measuredWaterLevel = 10; //integer (0, 10)
-
-
+var measuredMoistLevel;     // - integer (0, 100) %
+var measuredWaterLevel = 5; // - integer (0, 10)
 
 function RenderWaterTank(){
     let percent = (measuredWaterLevel / 10) * 100; 
@@ -39,78 +53,51 @@ function RenderWaterTank(){
     }
 }
 
-function Fetch(element){
+function GetValue(element){
     let val = element.value
-    return JSON.parse(JSON.parse(val).toFixed(4))
+    return parseInt(JSON.parse(val).toFixed(4))
 }
+
+const arduinoIP = "http://10.46.41.61"; // replace with Arduino IP
+
+async function sendData() {
+  const data = {
+    targetMoistLevel: targetMoistLevel,
+    indoorPlant: indoorPlant,
+    longitude: longditude,
+    latitude: latitude,
+  };
+
+  console.log("Sender data til arduino")
+
+  await fetch(`${arduinoIP}/set`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+}
+
+async function updateStatus() {
+  const res = await fetch(`${arduinoIP}/status`);
+  const data = await res.json();
+  measuredMoistLevel = data.measuredMoistLevel;
+  measuredWaterLevel = data.measuredWaterLevel;
+}
+
+setInterval(updateStatus, 2000); // poll every 2s
+
 
 //Les inputs og oppdater samsvarande variablar
 setInterval(()=>{
     indoorPlant = indoorPlantCheckbox.checked
-    longditude = Fetch(lonInput)
-    latitude = Fetch(latInput)
-    targetMoistLevel = Fetch(moistInput)
-
+    longditude = GetValue(lonInput)
+    latitude = GetValue(latInput)
+    targetMoistLevel = GetValue(moistInput)
 }, 100)
 
 setInterval(()=>{
-    measuredWaterLevel--
-    if (measuredWaterLevel < 0) measuredWaterLevel = 10
-    RenderWaterTank()
+    measuredWaterLevel += Math.sign()
+    measuredWaterLevel = Math.max(0, Math.min(10, measuredWaterLevel))
 },1000)
 
-const data = {
-    targetMoistLevel: targetMoistLevel,
-    indoorPlant: indoorPlant,
-    longditude: longditude,
-    latitude: latitude
-}
 
-const jsonData = JSON.stringify(data, null, 2);
-
-fs.writeFile('data.json', jsonData, (err) => {
-  if (err) {
-    console.error('Error writing to file:', err);
-  } else {
-    console.log('Data successfully written to output.json');
-  }
-});
-
-// Read the data.json file
-fs.readFile('data.json', 'utf8', (err, data) => {
-  if (err) {
-    console.error('Error reading the file:', err);
-    return;
-  }
-
-  try {
-    // Parse the JSON data
-    const jsonData = JSON.parse(data);
-
-    // Extract the measured moist level and water level
-    const measuredMoistLevel = jsonData.mesuredMoistLevel;
-    const measuredWaterLevel = jsonData.mesuredWaterLevel;
-
-    console.log('Measured Moist Level:', measuredMoistLevel);
-    console.log('Measured Water Level:', measuredWaterLevel);
-  } catch (parseError) {
-    console.error('Error parsing JSON:', parseError);
-  }
-});
-
-
-
-/**
-Input:
-- posisjon (lengdegrad, breiddegrad) 4 desimalar 
-- innendørsplante: bool
-- ønska fuktighet: %
-
-Status:
-- Vannbestand i tank
-- current fuktighetsnivå
-- skal regne neste 12 timar
-
-text nederst
--"Basert på data frå MET-Norge"
-**/
