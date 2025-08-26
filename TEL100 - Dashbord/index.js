@@ -15,7 +15,7 @@ const fs = request('fs');
 //Desse fire variablane må lesast av arduino
 var targetMoistLevel; //integer
 var indoorPlant; //booleansk verdi
-var langditude;
+var longditude;
 var latitude;
 
 //Desse 2 variablane må sendast
@@ -47,7 +47,7 @@ function Fetch(element){
 //Les inputs og oppdater samsvarande variablar
 setInterval(()=>{
     indoorPlant = indoorPlantCheckbox.checked
-    langditude = Fetch(lonInput)
+    longditude = Fetch(lonInput)
     latitude = Fetch(latInput)
     targetMoistLevel = Fetch(moistInput)
 
@@ -62,7 +62,7 @@ setInterval(()=>{
 const data = {
     targetMoistLevel: targetMoistLevel,
     indoorPlant: indoorPlant,
-    langditude: langditude,
+    longditude: longditude,
     latitude: latitude
 }
 
