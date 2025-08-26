@@ -31,7 +31,7 @@ const moistInput = document.getElementById("moist")
 //Desse fire variablane må lesast av arduino
 var targetMoistLevel; // - integer
 var indoorPlant;      // - booleansk verdi
-var longditude;       // - fire desimalar
+var longitude;        // - fire desimalar
 var latitude;         // - fire desimalar
 
 //Desse 3 variablane må sendast
@@ -64,7 +64,7 @@ async function sendData() {
   const data = {
     targetMoistLevel: targetMoistLevel,
     indoorPlant: indoorPlant,
-    longitude: longditude,
+    longitude: longitude,
     latitude: latitude,
   };
 
@@ -82,31 +82,29 @@ async function updateStatus() {
   const data = await res.json();
   measuredMoistLevel = data.measuredMoistLevel;
   measuredWaterLevel = data.measuredWaterLevel;
+
+  RenderWaterTank()
 }
 
-setInterval(updateStatus, 2000); // poll every 2s
 
 
 //Les inputs og oppdater samsvarande variablar
 setInterval(()=>{
     //oppdater variablar
     indoorPlant = indoorPlantCheckbox.checked
-    longditude = GetValue(lonInput)
+    longitude = GetValue(lonInput)
     latitude = GetValue(latInput)
     targetMoistLevel = GetValue(moistInput)
-
-    //kalkulering 
 
     //status
     statusElement1.innerHTML = `${measuredWaterLevel}%`
     statusElement2.innerHTML = (willRain) ? "Ja" : "Nei" 
-    statusElement3.innerHTML = (measuredWaterLevel < 20) ? "Ja" : "Nei"
+    statusElement3.innerHTML = (measuredWaterLevel < 10) ? "Ja" : "Nei"
+    //Kommuniser med Arduino
+    sendData()
+    updateStatus()
 
-}, 100)
+},2000)
 
-setInterval(()=>{
-    measuredWaterLevel += Math.sign()
-    measuredWaterLevel = Math.max(0, Math.min(10, measuredWaterLevel))
-},1000)
 
 
