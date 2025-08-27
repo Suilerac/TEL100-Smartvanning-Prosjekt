@@ -97,7 +97,7 @@ setInterval(()=>{
     targetMoistLevel = GetValue(moistInput)
 
     //status
-    statusElement1.innerHTML = `${measuredWaterLevel}%`
+    statusElement1.innerHTML = `${measuredMoistLevel}%`
     statusElement2.innerHTML = (willRain) ? "Ja" : "Nei" 
     statusElement3.innerHTML = (measuredWaterLevel < 10) ? "Ja" : "Nei"
     //Kommuniser med Arduino
@@ -105,6 +105,5 @@ setInterval(()=>{
     updateStatus()
 
 },2000)
-
 
 
