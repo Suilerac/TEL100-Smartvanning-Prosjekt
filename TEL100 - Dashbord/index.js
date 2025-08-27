@@ -13,9 +13,13 @@ Status:
 - current fuktighetsnivå
 - skal regne neste 12 timar
 
-text nederst
--"Basert på data frå MET-Norge"
+Takk til
+-"MET-Norge for værdata API"
+
+Ved spørsmål send mail til;
+johannes.husevåg.standal@nmbu.no
 **/
+
 const waterLevelElement = document.getElementById("vannBestand")
 
 const statusElement1 = document.getElementById("status1")
@@ -40,71 +44,94 @@ var measuredWaterLevel = 100;   // - integer (0, 100)
 var willRain = false            // - booleans verdi
 
 function RenderWaterTank(){ 
+    //Oppdater % i tittel
     waterLevelElement.innerHTML = `Vannbestand ${measuredWaterLevel}%`
-    for (let i = 1; i <= 10; i++){
-        const waterBarElement = document.getElementById(String(i))
 
-        if ((i-1)*10 <= measuredWaterLevel){
-            waterBarElement.style.visibility = "visible"
-        }
-        else {
-            waterBarElement.style.visibility = "hidden"
-        }
+    for (let i = 1; i <= 10; i++){
+      //Henter vannelement i koden
+      const waterBarElement = document.getElementById(String(i))
+
+      //Er vantanken over visst nivå så skal vannelementet synes
+      if ((i-1)*10 <= measuredWaterLevel){
+          waterBarElement.style.visibility = "visible"
+      }
+      //Dersom det ikke synes skal det vere usynlig.
+      else {
+          waterBarElement.style.visibility = "hidden"
+      }
     }
 }
 
+
 function GetValue(element){
+    //Henter data frå HTML element
+    //Tilpassa 4 desimalar for å samhandle med met-data api
     let val = element.value
-    return parseInt(JSON.parse(val).toFixed(4))
+    return JSON.parse(JSON.parse(val).toFixed(4))
 }
 
-const arduinoIP = "http://10.46.41.61"; // replace with Arduino IP
+// Server IP
+const arduinoIP = "http://10.46.41.61"; 
 
 async function sendData() {
+  //pakkar variablane i eit JSON format
   const data = {
     targetMoistLevel: targetMoistLevel,
     indoorPlant: indoorPlant,
     longitude: longitude,
     latitude: latitude,
   };
-
-  console.log("Sender data til arduino")
-
+  
+  //Sender HTTP forespørsel til server (Arduino)
+  //Sender data til server (Arduino)
   await fetch(`${arduinoIP}/set`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
+
+  console.log("Sender data til arduino")
 }
 
 async function updateStatus() {
+  //Sender HTTP forespørsel til server (Arduino)
+  //Henter data fra server (Arduino) til klient (nettside) 
   const res = await fetch(`${arduinoIP}/status`);
   const data = await res.json();
+  console.log("Henter data frå arduino")
+  
+  //Overfører variablar frå datasettet
   measuredMoistLevel = data.measuredMoistLevel;
   measuredWaterLevel = data.measuredWaterLevel;
+  willRain = data.willRain;
 
+  //Oppdaterer display på vanntank
   RenderWaterTank()
 }
 
-
-
-//Les inputs og oppdater samsvarande variablar
 setInterval(()=>{
-    //oppdater variablar
+    /*Løkke ansvarlig for;
+      - Initialisere kommunikasjon mellom Klient (Nettstad) og Server (Arduino)
+      - oppdatere inputs frå HTML Element
+      - oppdater variablar i samsvar til input
+    */
+
+    //Henter data frå server (Arduino)
+    updateStatus()
+    
+    //oppdater variablar frå HTML inputs
     indoorPlant = indoorPlantCheckbox.checked
     longitude = GetValue(lonInput)
     latitude = GetValue(latInput)
     targetMoistLevel = GetValue(moistInput)
-
-    //status
-    statusElement1.innerHTML = `${measuredWaterLevel}%`
+    
+    //Skriver informasjon til status feltet 
+    statusElement1.innerHTML = `${measuredMoistLevel}%`
     statusElement2.innerHTML = (willRain) ? "Ja" : "Nei" 
     statusElement3.innerHTML = (measuredWaterLevel < 10) ? "Ja" : "Nei"
-    //Kommuniser med Arduino
+    
+    //Sender data til server (Arduino)
     sendData()
-    updateStatus()
-
-},2000)
-
+},5000)
 
 
