@@ -67,7 +67,7 @@ function GetValue(element){
     //Henter data frå HTML element
     //Tilpassa 4 desimalar for å samhandle med met-data api
     let val = element.value
-    return JSON.parse(JSON.parse(val).toFixed(4))
+    return parseFloat(parseFloat(val).toFixed(4))
 }
 
 // Server IP
