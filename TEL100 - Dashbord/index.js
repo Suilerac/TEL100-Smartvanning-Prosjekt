@@ -71,7 +71,7 @@ function GetValue(element){
 }
 
 // Server IP
-const arduinoIP = "http://10.46.41.61"; 
+const arduinoIP = "http://" + window.location.hostname//10.46.41.61"; 
 
 async function sendData() {
   //pakkar variablane i eit JSON format
