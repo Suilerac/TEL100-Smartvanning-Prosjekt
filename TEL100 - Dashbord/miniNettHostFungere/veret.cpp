@@ -25,7 +25,6 @@ bool print = true;
 int yrData[24][2];
 
 bool checkForRain(float lat, float lon) {
-    Serial.println("Entered method CheckForRain()");
   PATH_NAME = "/weatherapi/locationforecast/2.0/compact?lat=" + String(lat)+ "&lon=" + String(lon);
   USER_AGENT = "NMBU_TEL100_StudentGruppeProsjekt andreas.carelius.brustad@nmbu.no";
 
@@ -35,6 +34,7 @@ bool checkForRain(float lat, float lon) {
   Serial.println("checking if wifi get time blah blah blah");
   if (WiFi.getTime() < expiresUnix) {
     Serial.println("Current time was less than expiredUnix");
+    Serial.println(WiFi.getTime());
   }
   if (WiFi.getTime() < rateLimitTimeStamp + 600) {
     Serial.println("Current time was less than rateLimitTimeStamp + 600");
