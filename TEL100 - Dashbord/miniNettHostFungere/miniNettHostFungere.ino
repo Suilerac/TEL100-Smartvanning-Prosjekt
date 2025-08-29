@@ -1,75 +1,82 @@
+//imports necessary libraries
 #include <WiFiNINA.h>
 #include <SD.h>
 #include <SPI.h>
 #include "veret.h"
 #include <Arduino.h>
+#include <Ultrasonic.h>
 
-// Desired IP address
-IPAddress ip(10, 46, 41, 61);
-IPAddress dns(8, 8, 8, 8);
-IPAddress subnet(255, 255, 255, 0);
+//Pins to read sensors and drive the water pump
+int motorPin = 5;
+int echoPin = 3;
+int trigPin = 4;
+Ultrasonic ultrasonic(trigPin, echoPin);
 
-// WiFi credentials
-char ssid[] = "Lassenett";
-char pass[] = "lassebass";
+//Variables sent to website
+bool willRain = false;
+int measuredMoistLevel = 55;
+int measuredWaterLevel = 65;
 
-WiFiServer server(80);
-
-// Variables received from website
+//Variables received from website
 bool indoorPlant = false;
 float longitude = 59.66;
 float latitude = 10.77;
 float targetMoistLevel = 0.0;
 
-// Variables sent to website
-bool willRain = false;
-int measuredMoistLevel = 55;
-int measuredWaterLevel = 65;
+//WiFi credentials
+char ssid[] = "Lassenett"; //Enter SSID of desired network
+char pass[] = "lassebass"; //Enter password of desired network
 
-// SD CS pin on ENV shield
+//Uses socket 80 (HTTP) to host website
+WiFiServer server(80);
+
+//SD CS pin on ENV shield
 #define SD_CS 4   
 
+//lastRainCheck is -3600000 because the arduino will spend 20 seconds at the start to get weather data, after that it will get the data once per hour
 unsigned long lastRainCheck = -3600000;
-const unsigned long rainCheckInterval = 0.5 * 60 * 1000; //checking every half minute
-
-extern int __heap_start, *__brkval;
-
+int lastSensorCheck = 0;
+int lastWatering = 0;
 
 void setup() {
+  //Sets pinMode
+  pinMode(motorPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(trigPin, OUTPUT);
+
+  //Initialize Serial
   Serial.begin(115200);
   delay(3000);
 
-  // Connect to WiFi
+  //Connect to WiFi
   Serial.print("Connecting to WiFi...");
-  WiFi.config(ip);
   int status = WiFi.begin(ssid, pass);
   
 
   while (status != WL_CONNECTED) {
     delay(1000);
     Serial.print(".");
-    WiFi.config(ip);
     status = WiFi.begin(ssid, pass);
   }
   delay(5000);
+  Serial.println(WiFi.getTime());
   Serial.println("\nWiFi connected.");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-
-  // Init SD card
+  //Init SD card
   if (!SD.begin(SD_CS)) {
     Serial.println("SD init failed!");
     while (1);
   }
   Serial.println("SD init OK");
 
-  // Start server
+  //Start server
   server.begin();
   Serial.println("Server started.");
 }
  
-// Send static files (HTML, CSS, JS, GIF)
+//Send static files (HTML, CSS, JS, GIF)
 void sendFile(WiFiClient &client, String path) {
   if (path == "/") path = "/INDEX.HTM";
   path.toUpperCase();
@@ -85,6 +92,7 @@ void sendFile(WiFiClient &client, String path) {
     return;
   }
 
+  //Tells the browser what type of http response to expect
   String contentType = "text/plain";
   if (path.endsWith(".HTM")) contentType = "text/html";
   else if (path.endsWith(".CSS")) contentType = "text/css";
@@ -96,6 +104,7 @@ void sendFile(WiFiClient &client, String path) {
   client.println("Connection: close");
   client.println();
 
+  //Uses a buffer write to the website without using all the available memory
   uint8_t buf[64];
   int n;
   while ((n = file.read(buf, sizeof(buf))) > 0) {
@@ -104,7 +113,7 @@ void sendFile(WiFiClient &client, String path) {
   file.close();
 }
 
-// Send JSON status
+//Sends JSON status
 void sendStatus(WiFiClient &client) {
   client.println("HTTP/1.1 200 OK");
   client.println("Content-Type: application/json");
@@ -120,7 +129,7 @@ void sendStatus(WiFiClient &client) {
   client.println("}");
 }
 
-// Handle POST /set with JSON body
+//Handle POST / set with JSON body
 void handleSet(WiFiClient &client, String body) {
   // Very basic JSON parsing (since Arduino doesn’t have a full JSON lib)
   if (body.indexOf("indoorPlant") >= 0) {
@@ -135,6 +144,7 @@ void handleSet(WiFiClient &client, String body) {
   idx = body.indexOf("\"targetMoistLevel\":");
   if (idx >= 0) targetMoistLevel = body.substring(idx + 19).toFloat();
 
+  //Serial prints what it read from the website.
   Serial.println("Updated settings:");
   Serial.print("Indoor: "); Serial.println(indoorPlant);
   Serial.print("Lat: "); Serial.println(latitude, 4);
@@ -149,23 +159,34 @@ void handleSet(WiFiClient &client, String body) {
 }
 
 void loop() {
-  //checkForRain(43.7370, 7.4212);
-  Serial.println("Waiting for NTP time...");
-  while (WiFi.getTime() == 0) {
-      delay(1000); // allows WiFiNINA to sync
-  }
-  Serial.println("Time synchronized!");
-
+  //Gives the arudino 20 seconds to connect to the MET api every hour (It is run in a loop because the method is made to work that way)
   if (millis() - lastRainCheck > 1000 * 60 * 60){
     Serial.println("Checking rain");
     lastRainCheck = millis();
-    while ((millis() - lastRainCheck) < 30000){
+    while ((millis() - lastRainCheck) < 20000){
       willRain = checkForRain(latitude, longitude);
     }
   }
+  //Checks sensor values every 3 seconds
+  if (millis() - lastSensorCheck > 3000){
+    setSensorValues();
+  }
 
-  
+  //If indoor plant box is checked on website, ignore weather
+  if (indoorPlant){
+    willRain = false;
+  }
+  //Waters the plant every 30 seconds if the moisture is less than wanted moisture and if it is outside
+  if (millis() - lastWatering > 30000){
+    if ((measuredMoistLevel < targetMoistLevel) && (!willRain)) {
+      digitalWrite(motorPin, HIGH);
+      delay(1000);
+      digitalWrite(motorPin, LOW);
+      lastWatering = millis();
+    }
+  }
 
+  //If a client is connected, handle sending files and reading from website
   WiFiClient webClient = server.available();
   if (webClient) {
     Serial.println("New client connected.");
@@ -205,4 +226,12 @@ void loop() {
     webClient.stop();
     Serial.println("Client disconnected.");
   }
+}
+
+//Sets sensor values and maps them to their respective percentages to be used on the website
+void setSensorValues() {
+  delay(10);
+  int waterLevel = ultrasonic.read();
+  measuredWaterLevel = map(waterLevel, 3, 24, 100, 0);
+  measuredMoistLevel = map(analogRead(A6), 400, 800, 100, 0);
 }
