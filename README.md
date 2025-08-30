@@ -11,6 +11,18 @@ Kode og ressurser for å kontrollere følgende:
 - Implementasjon av MET Norge sin værdata for å ikke vanne hvis det regner (kan skrus av i brukergrensesnittet)
 - Dashboard hosta som en nettside for redigering av instillinger
 
+## Flytskjema for overordnet konsept
+
+![screenshot](https://github.com/Suilerac/TEL100-Smartvanning-Prosjekt/blob/main/readme%20screenshots/flytskjema%20firmware.png?raw=true)
+
+## Kretsdiagram
+
+![screeenshot](https://github.com/Suilerac/TEL100-Smartvanning-Prosjekt/blob/main/readme%20screenshots/kretsskjema.png?raw=true)
+
+## Flytskjema for firmware
+
+![screenshot](https://github.com/Suilerac/TEL100-Smartvanning-Prosjekt/blob/main/readme%20screenshots/flytskjema%20firmware.png?raw=true)
+
 ## Kontakt
 
 Følgende personer kan kontaktes for spørsmål om prosjektet:
