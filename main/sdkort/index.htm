@@ -1,0 +1,65 @@
+<head>
+    <link rel="stylesheet" href="index.css"></link>
+    <title>Smartpotte </title>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <div id="container">
+        <h1>Smartpotte kontrollpanel</h1>
+    </div>
+
+    <div id="main"> 
+        <div id="status">
+            <h2>Status</h2>
+            <table>
+                <tr>
+                    <td>Målt jordfuktighet</td>
+                    <td id="status1">100%</td>
+                </tr>
+                <tr>
+                    <td>Forventes regn</td>
+                    <td id="status2">Ja</td>
+                </tr>
+                <tr>
+                    <td>Bør fylle vanntank</td>
+                    <td id="status3">Ja</td>
+                </tr>
+            </table>
+            <p>Basert på data frå MET-Norge</p>
+        </div>
+        <div id="inputs">
+            <h3>Innstillinger</h3>
+            <form>
+                <label>
+                    <input type="checkbox" id="indoor"> Planten står innendørs
+                </label>
+                <br><br>
+                <label>Breddegrad:           <input type="number" value="0" step="0.0001" id="lat"></label><br><br>
+                <label>Lengdegrad:           <input type="number" value="0" step="0.0001" id="lon"></label><br><br>
+                <label>Ønsket jordfuktighet: <input type="number" value="0" id="moist"> %</label>
+            </form>
+        </div>
+        <div id="plantImage">
+            <img src="Plante.gif" alt="episk bilete">
+        </div>
+        <div id="waterDisplay">
+            <h4 id="vannBestand">Vannbestand - ?%</h4>
+            <div id="waterTank">
+                <div id="10" class="waterBar"></div>
+                <div id="9" class="waterBar"></div>
+                <div id="8" class="waterBar"></div>
+                <div id="7" class="waterBar"></div>
+                <div id="6" class="waterBar"></div>
+                <div id="5" class="waterBar"></div>
+                <div id="4" class="waterBar"></div>
+                <div id="3" class="waterBar"></div>
+                <div id="2" class="waterBar"></div>
+                <div id="1" class="waterBar"></div>
+            </div>
+        </div>
+    </div>
+    <br>
+</body>
+
+<script src="index.js"></script>
