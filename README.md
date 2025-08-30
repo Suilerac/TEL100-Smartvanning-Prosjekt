@@ -13,7 +13,7 @@ Kode og ressurser for å kontrollere følgende:
 
 ## Flytskjema for overordnet konsept
 
-![screenshot](https://github.com/Suilerac/TEL100-Smartvanning-Prosjekt/blob/main/readme%20screenshots/flytskjema%20firmware.png?raw=true)
+![screenshot](https://github.com/Suilerac/TEL100-Smartvanning-Prosjekt/blob/main/readme%20screenshots/flytskjema%20konsept.png?raw=true)
 
 ## Kretsdiagram
 
